@@ -141,6 +141,10 @@ Path                                                                    Size    
 Remove 2 development artifacts (640.5 MB)? [y/N]
 ```
 
+## Documentation
+
+For complete documentation with examples and detailed usage instructions, visit our [documentation website](https://npsg02.github.io/safe-clean/).
+
 ## License
 
 MIT License
