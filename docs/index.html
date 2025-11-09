@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="safe-clean - A safe disk cleanup CLI/TUI tool built with Rust">
+    <title>safe-clean - Safe Disk Cleanup Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 1.3em;
+            opacity: 0.95;
+            margin-bottom: 30px;
+        }
+
+        .badges {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            backdrop-filter: blur(10px);
+        }
+
+        nav {
+            background: #f8f9fa;
+            padding: 20px 40px;
+            border-bottom: 2px solid #e9ecef;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #764ba2;
+        }
+
+        main {
+            padding: 40px;
+        }
+
+        section {
+            margin-bottom: 50px;
+        }
+
+        h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        h3 {
+            color: #764ba2;
+            font-size: 1.5em;
+            margin: 25px 0 15px;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 25px;
+            border-radius: 10px;
+            color: white;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .feature-card h3 {
+            color: white;
+            margin-top: 0;
+            font-size: 1.3em;
+        }
+
+        .code-block {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            line-height: 1.5;
+            border-left: 4px solid #667eea;
+        }
+
+        .code-block .comment {
+            color: #5c6370;
+        }
+
+        .code-block .command {
+            color: #61afef;
+        }
+
+        .install-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .safety-features {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .safety-features h3 {
+            color: #155724;
+        }
+
+        .safety-features ul {
+            margin-left: 25px;
+            margin-top: 15px;
+        }
+
+        .safety-features li {
+            margin-bottom: 10px;
+            color: #155724;
+        }
+
+        .example-output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+
+        .example-output .emoji {
+            color: #ffd700;
+        }
+
+        .example-output .size {
+            color: #4ec9b0;
+        }
+
+        .example-output .path {
+            color: #ce9178;
+        }
+
+        ul {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 50px;
+            text-align: center;
+            margin: 40px 0;
+            border-radius: 10px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: white;
+            color: #667eea;
+            padding: 15px 40px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-top: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .cta-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        footer {
+            background: #2d3436;
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+
+        footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .subtitle {
+                font-size: 1.1em;
+            }
+
+            main {
+                padding: 20px;
+            }
+
+            header {
+                padding: 40px 20px;
+            }
+
+            nav ul {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .cta-section {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧹 safe-clean</h1>
+            <p class="subtitle">A safe disk cleanup CLI/TUI tool built with Rust</p>
+            <div class="badges">
+                <span class="badge">🦀 Rust</span>
+                <span class="badge">⚡ Fast</span>
+                <span class="badge">🛡️ Safe</span>
+                <span class="badge">🎨 TUI</span>
+                <span class="badge">📝 MIT License</span>
+            </div>
+        </header>
+
+        <nav>
+            <ul>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#installation">Installation</a></li>
+                <li><a href="#usage">Usage</a></li>
+                <li><a href="#commands">Commands</a></li>
+                <li><a href="#safety">Safety</a></li>
+                <li><a href="#examples">Examples</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <section id="about">
+                <h2>About</h2>
+                <p>safe-clean is a powerful yet safe disk cleanup tool that helps you identify and remove unnecessary files from your system. Built with Rust for performance and safety, it provides both an interactive TUI (Terminal User Interface) and a comprehensive CLI for all your cleanup needs.</p>
+            </section>
+
+            <section id="features">
+                <h2>Features</h2>
+                <div class="features">
+                    <div class="feature-card">
+                        <h3>🎨 Interactive TUI Mode</h3>
+                        <p>Browse and explore your disk usage with an intuitive terminal interface that makes cleanup easy and visual.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🐳 Docker Cleanup</h3>
+                        <p>Safely remove unused Docker containers, images, volumes, and networks to reclaim disk space.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🗑️ Temporary Files</h3>
+                        <p>Clean system temporary directories and files that accumulate over time.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>📊 Directory Analysis</h3>
+                        <p>List directories by size to quickly identify where your disk space is being used.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🔍 Large File Discovery</h3>
+                        <p>Find files larger than a specified threshold to identify space hogs.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>💻 Dev Artifacts Cleanup</h3>
+                        <p>Discover and remove node_modules, .venv, target, and other development artifacts.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🔒 Dry Run Mode</h3>
+                        <p>Preview what would be cleaned without actually removing anything - safety first!</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>✅ Safety Checks</h3>
+                        <p>All operations include confirmation prompts and safety checks to prevent accidents.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="installation">
+                <h2>Installation</h2>
+                <div class="install-section">
+                    <h3>Build from Source</h3>
+                    <div class="code-block">
+# Clone the repository<br>
+git clone https://github.com/npsg02/safe-clean.git<br>
+cd safe-clean<br>
+<br>
+# Build the release version<br>
+cargo build --release<br>
+<br>
+# The binary will be available at:<br>
+# ./target/release/safe-clean
+                    </div>
+                </div>
+            </section>
+
+            <section id="usage">
+                <h2>Usage</h2>
+                
+                <h3>Interactive TUI Mode (Default)</h3>
+                <p>Launch the interactive terminal interface for the best user experience:</p>
+                <div class="code-block">
+safe-clean<br>
+<span class="comment"># or explicitly</span><br>
+safe-clean tui
+                </div>
+
+                <h3>Command Line Interface</h3>
+                <p>Use CLI commands for scripting and automation:</p>
+            </section>
+
+            <section id="commands">
+                <h2>CLI Commands</h2>
+
+                <h3>📋 List Directories by Size</h3>
+                <div class="code-block">
+<span class="comment"># List top 20 largest directories in current directory</span><br>
+safe-clean list<br>
+<br>
+<span class="comment"># List top 10 largest directories</span><br>
+safe-clean list --top 10<br>
+<br>
+<span class="comment"># Analyze specific path</span><br>
+safe-clean list /path/to/analyze --top 15
+                </div>
+
+                <h3>🔍 Find Large Files</h3>
+                <div class="code-block">
+<span class="comment"># Find files larger than 100MB (default)</span><br>
+safe-clean large<br>
+<br>
+<span class="comment"># Find files larger than 1GB</span><br>
+safe-clean large --size 1GB<br>
+<br>
+<span class="comment"># Search in specific directory</span><br>
+safe-clean large /path/to/search --size 500MB
+                </div>
+
+                <h3>💻 Development Artifacts Cleanup</h3>
+                <div class="code-block">
+<span class="comment"># Find development artifacts (dry run)</span><br>
+safe-clean dev-clean --dry-run<br>
+<br>
+<span class="comment"># Actually remove development artifacts (with confirmation)</span><br>
+safe-clean dev-clean<br>
+<br>
+<span class="comment"># Search in specific directory</span><br>
+safe-clean dev-clean /path/to/projects --dry-run
+                </div>
+
+                <h3>🐳 Docker Cleanup</h3>
+                <div class="code-block">
+<span class="comment"># Preview Docker cleanup</span><br>
+safe-clean docker --dry-run<br>
+<br>
+<span class="comment"># Clean up Docker resources (with confirmation)</span><br>
+safe-clean docker
+                </div>
+
+                <h3>🗑️ Temporary Files Cleanup</h3>
+                <div class="code-block">
+<span class="comment"># Preview temp files cleanup</span><br>
+safe-clean temp --dry-run<br>
+<br>
+<span class="comment"># Clean up temporary files (with confirmation)</span><br>
+safe-clean temp
+                </div>
+
+                <h3>⚙️ Command Options</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Option</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>--dry-run</code></td>
+                            <td>Preview what would be cleaned without actually removing anything</td>
+                        </tr>
+                        <tr>
+                            <td><code>--top N</code></td>
+                            <td>Limit results to top N items (for list command)</td>
+                        </tr>
+                        <tr>
+                            <td><code>--size SIZE</code></td>
+                            <td>Specify size threshold (e.g., "100MB", "1GB", "500KB")</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="safety">
+                <h2>Safety Features</h2>
+                <div class="safety-features">
+                    <h3>🛡️ Built-in Safety Mechanisms</h3>
+                    <ul>
+                        <li><strong>Confirmation Prompts:</strong> All destructive operations require explicit user confirmation</li>
+                        <li><strong>Dry Run Mode:</strong> Preview operations before executing them to see exactly what will be affected</li>
+                        <li><strong>Safe File Detection:</strong> Only removes files that match known safe patterns</li>
+                        <li><strong>Path Validation:</strong> Prevents removal of system-critical directories</li>
+                        <li><strong>Detailed Reporting:</strong> Shows exactly what will be or was cleaned with size information</li>
+                    </ul>
+                </div>
+
+                <h3>Development Artifacts Detected</h3>
+                <ul>
+                    <li><code>node_modules</code> - Node.js dependencies</li>
+                    <li><code>.venv</code>, <code>venv</code> - Python virtual environments</li>
+                    <li><code>__pycache__</code> - Python cache files</li>
+                    <li><code>.tox</code> - Python testing artifacts</li>
+                    <li><code>target</code> - Rust build artifacts</li>
+                    <li><code>build</code>, <code>dist</code> - General build artifacts</li>
+                </ul>
+
+                <h3>Size Format</h3>
+                <p>Size values can be specified in various formats:</p>
+                <ul>
+                    <li><code>1024</code> - bytes</li>
+                    <li><code>1KB</code>, <code>1MB</code>, <code>1GB</code>, <code>1TB</code></li>
+                    <li><code>1.5GB</code>, <code>500MB</code>, etc.</li>
+                </ul>
+            </section>
+
+            <section id="examples">
+                <h2>Example Output</h2>
+                <div class="example-output">
+<span class="emoji">🛠️</span>  Development Artifacts Cleanup<br>
+=================================<br>
+Searching in: .<br>
+<br>
+<span class="emoji">📊</span> Found development artifacts:<br>
+Path                                                                    Size      Items<br>
+-------------------------------------------------------------------------------------<br>
+<span class="path">./target</span>                                                            <span class="size">484.2 MB</span>       1220<br>
+<span class="path">./node_modules</span>                                                       <span class="size">156.3 MB</span>        892<br>
+<br>
+<span class="emoji">📈</span> Summary:<br>
+   Total artifacts: 2<br>
+   Total size: <span class="size">640.5 MB</span><br>
+   Total items: 2112<br>
+<br>
+Remove 2 development artifacts (640.5 MB)? [y/N]
+                </div>
+            </section>
+
+            <div class="cta-section">
+                <h2>Get Started Today!</h2>
+                <p style="font-size: 1.2em; margin: 20px 0;">Clean up your disk space safely and efficiently with safe-clean</p>
+                <a href="https://github.com/npsg02/safe-clean" class="cta-button">View on GitHub</a>
+            </div>
+        </main>
+
+        <footer>
+            <p>Made with ❤️ by <a href="https://github.com/npsg02">npsg02</a></p>
+            <p style="margin-top: 10px;">Licensed under the MIT License</p>
+            <p style="margin-top: 10px;">
+                <a href="https://github.com/npsg02/safe-clean">GitHub</a> | 
+                <a href="https://github.com/npsg02/safe-clean/issues">Report Issue</a>
+            </p>
+        </footer>
+    </div>
+</body>
+</html>
