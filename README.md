@@ -15,8 +15,67 @@ A safe disk cleanup CLI/TUI tool built with Rust that helps you identify and cle
 
 ## Installation
 
+### Using Nix Flakes
+
 ```bash
-# Build from source
+# Run directly without installing
+nix run github:npsg02/safe-clean
+
+# Install to your profile
+nix profile install github:npsg02/safe-clean
+
+# Try it out in a temporary shell
+nix shell github:npsg02/safe-clean
+```
+
+### Using Nix (traditional)
+
+```bash
+# Install using nix-env
+git clone https://github.com/npsg02/safe-clean.git
+cd safe-clean
+nix-env -if .
+```
+
+### NixOS Configuration
+
+Add to your `configuration.nix`:
+
+```nix
+{
+  inputs.safe-clean.url = "github:npsg02/safe-clean";
+  # ... other inputs
+}
+
+# In your configuration
+{ inputs, ... }:
+{
+  imports = [ inputs.safe-clean.nixosModules.default ];
+  
+  programs.safe-clean.enable = true;
+}
+```
+
+Or add directly to `environment.systemPackages`:
+
+```nix
+{ pkgs, ... }:
+{
+  environment.systemPackages = [
+    (pkgs.callPackage (pkgs.fetchFromGitHub {
+      owner = "npsg02";
+      repo = "safe-clean";
+      rev = "main"; # or specific commit/tag
+      sha256 = ""; # nix will tell you the correct hash
+    }) {})
+  ];
+}
+```
+
+### Build from source
+
+```bash
+# Build from source with Cargo
 git clone https://github.com/npsg02/safe-clean.git
 cd safe-clean
 cargo build --release
