@@ -15,6 +15,8 @@ A safe disk cleanup CLI/TUI tool built with Rust that helps you identify and cle
 
 ## Installation
 
+> **For detailed Nix installation instructions**, see [docs/NIX_INSTALLATION.md](docs/NIX_INSTALLATION.md)
+
 ### Using Nix Flakes
 
 ```bash
